@@ -3,6 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
+
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.Hashtable;
@@ -32,12 +33,13 @@ public class DV {
         //System.out.println("Busco mejor ruta: " + getRoute("C"));
     }
     
+    //Recibo que router soy
     public static synchronized void setMe(String node) {
         me = node;
     }
     
     public static synchronized void setDV(String column, String row, int coste) {
-        //Para nuevas columnas y nuevas filas con sus respectivos costos
+        //Verifico si ya existo como columna (router)
         if (me.length()>0 && !column.equals(me) && column.length()>0 && row.length()>0 && coste>0) {
             if (!hash.containsKey(column)) {
                 ArrayList<Hashtable> list = new ArrayList<Hashtable>();
@@ -52,16 +54,16 @@ public class DV {
                 hash.put(column, list);
                 findKeys();
             } else {
+                //Si la columna(router) existe, verifico existencia de destinos (filas)
                 int advance=0;
                 int newCoste=0;
                 ArrayList list = (ArrayList)hash.get(column);
                 for (int i=0;i<list.size();i++) {
                     Hashtable filas = (Hashtable)list.get(i);
                     if (filas.containsKey(row)) {
-                       // System.out.println("Advance > 1");
                         advance=1;
                         
-                        //Obtengo costo de la columna
+                        //Obtengo costo de la columna (router)
                         for (int j=0;j<list.size();j++) {
                             Hashtable filaVal = (Hashtable)list.get(j);
                             if (filaVal.containsKey(column)) {
@@ -71,19 +73,20 @@ public class DV {
                             }
                         }
                         
-                        //Costos de fila a buscar
+                        //Actualizo el costo del destino (row)
                         Integer[] costes = (Integer[])filas.get(row);
                         costes[0] = newCoste + coste;
                         newCoste=0;
                         
-                        //REVISO SI EN EL CAMBIO ALGUIEN ES MENOR (fila)
+                        //REVISO SI EN EL CAMBIO ALGUIEN ES MENOR (row de cada router(column))
+                        //Obtengo las columnas (routers)
                         Stack<String> keycol = new Stack<String>();
                         Enumeration<String> keycolumn = hash.keys();
                         while (keycolumn.hasMoreElements()) {
                             keycol.push(keycolumn.nextElement());
                         }
                         
-                        //Obtengo la fila del valor que quiero modificar (row)
+                        //Obtengo las filas con valor row(destino) de cada columna(router)
                         Object[] values = new Object[keycol.size()];
                         String keyMin=null;
                         Integer[] minCoste = null;
@@ -104,27 +107,15 @@ public class DV {
                             }
                         }
                         
-                        //AQUI ESTA EL CLAVO!!
+                        //Si hubiese nuevo mínimo, actualizo tabla
                         for (int j=0; j<keycol.size();j++) {
                             Hashtable temp = (Hashtable)values[j];
                             Integer[] tempCost = (Integer[])temp.get(keycol.get(j));
                             if (tempCost[0] < minCoste[0]) {
-                                //ASIGNO EL MENOR Y QUE ESTA SUCIO
+                                //ASIGNO EL MENOR Y QUE ESTA SUCIO, AQUI EL HASH ORIGINAL YA ESTÁ ACTUALIZADO
                                 tempCost[1] = 1;
                                 tempCost[2] = 1;
-                                ArrayList lista = (ArrayList)hash.get(keycol.get(j));
-                                Hashtable temp2 = (Hashtable)lista.get(j);
-                                temp2.put(keycol.get(j), tempCost);
-                                //QUITO EL QUE ERA MENOR
                                 minCoste[1] = 0;
-                                ArrayList reverseList = (ArrayList)hash.get(keyMin);
-                                for (int z=0;z<reverseList.size();z++) {
-                                    Hashtable reverseHash = (Hashtable)reverseList.get(z);
-                                    if (reverseHash.containsKey(keyMin)) {
-                                        reverseHash.put(keyMin, minCoste);
-                                        break;
-                                    }
-                                }
                             }
                         }
                     }
@@ -144,6 +135,7 @@ public class DV {
         }
     }
     
+    //Actualizo los costos a 99 (infinito) para nuevos destinos que sean ingresados
     private static synchronized void findKeys() {
         Stack<String> keycol = new Stack<String>();
         int contiene=0;
@@ -154,7 +146,6 @@ public class DV {
         }
         
         if (keycol.size()>1) {
-            //validado System.out.println("keycol.size()>1: "+ keycol.size());
             for (int i=0;i<keycol.size();i++) {
                 ArrayList list = (ArrayList)hash.get(keycol.get(i));
                 if (list.size() < keycol.size()) {
@@ -177,7 +168,6 @@ public class DV {
                             flagCoste[2] = 0; //debe cambiar a 0, solo es 1 para pruebas
                             newHash.put(keycol.get(k), flagCoste);
                             list.add(newHash);
-                            //System.out.println("pase por aqui " + keycol.get(k));
                         }
                     }
                 }
@@ -187,7 +177,6 @@ public class DV {
     
     public static synchronized String getRoute(String destiny) {
         Stack<String> keycol = new Stack<String>();
-        int contiene=0;
         
         Enumeration<String> keycolumn = hash.keys();
         while (keycolumn.hasMoreElements()) {
@@ -241,7 +230,7 @@ public class DV {
                 for (int z=0; z<keyfila.size();z++) {
                     if (rows.get(keyfila.get(z)) != null) {
                         Integer[] costes = (Integer[])rows.get(keyfila.get(z));
-                        if (costes[1] == 1) {// && costes[2]==1) {
+                        if (costes[2] == 1) {
                             i++;
                             res.append(keyfila.get(z) + ":" + costes[0] + "\n");
                         }
@@ -249,8 +238,6 @@ public class DV {
                         rows.put(keyfila.get(z), costes);
                         list.set(k, rows);
                         hash.put(keycol.get(j), list);
-                        //costes = (Integer[])cols.get(keyfila.get(j));
-                        //System.out.println("Sucio:" + costes[1]);      
                     }   
                 }
             }
