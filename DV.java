@@ -1,9 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
-
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.Hashtable;
@@ -19,16 +13,9 @@ public class DV {
     
     public static void main(String[] args) {
         setMe("A");
-        setDV("B","B",7);
-        setDV("C","C",11);
-        setDV("D","D",5);
-        //System.out.println(returnDirty());
-        //setDV("B","B",3);
-        //setDV("L","L",5);
-        //setDV("P","P",5);
-        //setDV("Q","Q",5);
-        System.out.println(returnDirty());
-        setDV("B","C",2);
+        setDV("B","B",2);
+        setDV("C","C",8);
+        setDV("B","C",5);
         System.out.println(returnDirty());
         //System.out.println("Busco mejor ruta: " + getRoute("C"));
     }
@@ -107,15 +94,16 @@ public class DV {
                             }
                         }
                         
-                        //Si hubiese nuevo mínimo, actualizo tabla
+                        //Si hubiese nuevo minimo, actualizo tabla
                         for (int j=0; j<keycol.size();j++) {
                             Hashtable temp = (Hashtable)values[j];
                             Integer[] tempCost = (Integer[])temp.get(keycol.get(j));
                             if (tempCost[0] < minCoste[0]) {
-                                //ASIGNO EL MENOR Y QUE ESTA SUCIO, AQUI EL HASH ORIGINAL YA ESTÁ ACTUALIZADO
+                                //ASIGNO EL MENOR Y QUE ESTA SUCIO, AQUI EL HASH ORIGINAL YA ESTA ACTUALIZADO
                                 tempCost[1] = 1;
                                 tempCost[2] = 1;
                                 minCoste[1] = 0;
+                                minCoste[2] = 0;
                             }
                         }
                     }
