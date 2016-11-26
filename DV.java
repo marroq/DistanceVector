@@ -274,7 +274,6 @@ public class DV {
                             i++;
                             res.append(keyfila.get(z) + ":" + costes[0] + "\n");
                         }
-                        costes[2] = 0;
                         rows.put(keyfila.get(z), costes);
                         list.set(k, rows);
                         hash.put(keycol.get(j), list);
