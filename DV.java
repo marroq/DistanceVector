@@ -14,8 +14,12 @@ public class DV {
     public static void main(String[] args) {
         setMe("A");
         setDV("B","B",2);
-        setDV("C","C",8);
-        setDV("B","C",5);
+        setDV("C","C",3);
+        setDV("D","D",11);
+        System.out.println(returnDirty());
+        setDV("C","D",1);
+        System.out.println(returnDirty());
+        setDV("B","D",1);
         System.out.println(returnDirty());
         //System.out.println("Busco mejor ruta: " + getRoute("C"));
     }
@@ -219,6 +223,54 @@ public class DV {
                     if (rows.get(keyfila.get(z)) != null) {
                         Integer[] costes = (Integer[])rows.get(keyfila.get(z));
                         if (costes[2] == 1) {
+                            i++;
+                            res.append(keyfila.get(z) + ":" + costes[0] + "\n");
+                        }
+                        costes[2] = 0;
+                        rows.put(keyfila.get(z), costes);
+                        list.set(k, rows);
+                        hash.put(keycol.get(j), list);
+                    }   
+                }
+            }
+        }
+        
+        if (i>0) {
+            res.insert(0, "Len:"+String.valueOf(i)+"\n");
+            return res.toString();
+        } else {
+            return null;
+        }
+    }
+    
+    public static synchronized String getAll() {
+        StringBuilder res = new StringBuilder();
+        Stack<String> keycol = new Stack<String>();
+        Stack<String> keyfila = new Stack<String>();
+        int i=0;
+        
+        Enumeration<String> keycolumn = hash.keys();
+        while (keycolumn.hasMoreElements()) {
+            keycol.push(keycolumn.nextElement());
+        }
+        
+        for (int j=0;j<keycol.size();j++) {
+            ArrayList valcol = (ArrayList)hash.get(keycol.get(j));
+            Hashtable filas = (Hashtable)valcol.get(0);
+            Enumeration<String> keyrow = filas.keys();
+            while (keyrow.hasMoreElements()) {
+                keyfila.push(keyrow.nextElement());
+            }
+        }
+        
+        for (int j=0; j<keycol.size();j++) {
+            ArrayList list = (ArrayList)hash.get(keycol.get(j));
+            for (int k=0; k<list.size();k++) {
+                Hashtable rows = (Hashtable)list.get(k);
+                for (int z=0; z<keyfila.size();z++) {
+                    if (rows.get(keyfila.get(z)) != null) {
+                        Integer[] costes = (Integer[])rows.get(keyfila.get(z));
+                        if (costes[1] == 1) {
                             i++;
                             res.append(keyfila.get(z) + ":" + costes[0] + "\n");
                         }
